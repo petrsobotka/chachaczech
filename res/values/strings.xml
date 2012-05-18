@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ChaChaCzech</string>
+    <string name="settings_label">Nastavení klávesnice ChaChaCzech </string>
+    <string-array name="settings_items">
+        <item>QWERTZ</item>
+    </string-array>
+</resources>

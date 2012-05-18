@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/item_checkbox" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:gravity="center_vertical"
+	android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+	android:clickable="false" android:focusable="false"
+	android:paddingLeft="16dip" android:paddingRight="16dip" android:text=""
+	android:typeface="sans" android:textSize="24dip" /> 
