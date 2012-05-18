@@ -45,7 +45,7 @@ public class ChaChaCzech extends InputMethodService  {
         SharedPreferences preferences = getSharedPreferences(ChaChaCzechSettings.PREF_FILE_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         
-        // "0" je klic preference, ktera udrzuje, zda je zapnuto QWERTZ
+        // "0" is the key of preference which stores whether QWERTZ is ON
         if(preferences.contains("0"))
         	QWERTZ = preferences.getBoolean("0", false);
         else {
@@ -64,20 +64,22 @@ public class ChaChaCzech extends InputMethodService  {
         super.onFinishInput();
     }
 	
-	/**
-	 * Když vrátím false, znak se normálně zapíše. Když true, tak se znak zachytí a musím něco udělat sám.
-	 */
+    /**
+     * return false to pass the letter, return true to catch it and handle it ourselves
+     */
     @Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-    	// když je zapnutý alt a zmáčkne se mezera, systém posílá událsot s číslem 126, 
-    	// ale v logu se dekóoduje jako KEYCODE_RESET_META, což v manuálu není.
-    	// každopádně to posílá nějaký jiný proces. Způsobuje to vypnutí met akláves ať už jsou v jakémkoli stavu.
-    	// to ovšem není schopen reflektovat MyMetaKeyKeyListener, ten si myslí, že jsou meta klávesy stále aktivní. 
-    	// když to zachytíme a zahodíme, bude zase vše v pořádku.
+    	/*
+    	 * If ALT on and SPACE pressed, the system sends event with code 126 but in the log it is decoded as KEYCODE_RESET_META
+    	 * which is not described in offical documentation. It is send by some other process and it causes reset of meta 
+    	 * keys whatever state they are in. But this can't be handeled by our own MyMetaKeyListener.
+    	 * 
+    	 * If we throw it away, everything will be ok ;-)
+    	 */
     	if(keyCode == 126)
     	{
-    		//Log.v("TYPUDALOSTI", "ZAHAZUJU MALWARE");
+    		//Log.v("EVENTTYPE", "THROW AWAY THIS STUFF");
     		return true;
     	}
     	
@@ -132,13 +134,13 @@ public class ChaChaCzech extends InputMethodService  {
 					handleAccentKey(event, "ú", "Ú", ic);
 	                return true;
 	            /*
-	             * 'ů' je sem umístěno kvůli zapamatování: U a V jsou vizuálně podobné
+	             *  'ů' takes place here because it is easier to remember: U and V are visually similar.
 	             */
 				case KeyEvent.KEYCODE_V:
 					handleAccentKey(event, "ů", "Ů", ic);  
 	                return true;
 	            /*
-	             * 'ě' je sem umístěno kvůli blízkosti k 'é' a také, protože nad W je 'ě' na běžné PC klávesnici
+	             * 'ě' takes place here because it is near to 'é' and because it is situated above 'W' on typical czech keyboard layout. 
 	             */
 				case KeyEvent.KEYCODE_W:
 					handleAccentKey(event, "ě", "Ě", ic);
@@ -179,7 +181,7 @@ public class ChaChaCzech extends InputMethodService  {
 	}
     
     /**
-     * Metoda obslouží zachycenou událost, na kterou je potřeba reagovat posláním akcentovaného písmenka.
+     * This method handles an event, which has to cause insertion of an accented letter.
      * @param event
      * @param smallCaps
      * @param caps
@@ -193,17 +195,16 @@ public class ChaChaCzech extends InputMethodService  {
 		} else if (shiftActive) {
 			ic.commitText(caps, 1);
 			
-		    /*
-		     * Následující dva řádky slouží pro vyčištění shiftu pro další procesy, které se podílejí na zpracování 
-		     * zadávaného textu. Když je zapnutý shift, sice adekvátně reagujeme a shift zpracujeme, ale pokud
-		     * se InputConnection vysloveně nepošle KeyEvent, tak shift jakoby zůstává zapnutý (jiný proces má svůj vlastní MetaKeKeyListener pravděpodobně).
-		     * Další zadané písmeno (které nehandlujeme) pak shift zpracuje a stane se velkým písmenem. 
-		     * To je nežádoucí. Proto je zde tento workaround. Pošleme dvě události, že byl zmáčkut SHIFT.
-		     * První zmáčknutí způsobí zapnutí CAPS LOCK (SHIFT LOCKED) a to duhé úplné vypnutí shiftu. 
-		     * Shift tak zcela zkonzumujeme. 
-		     * 
-		     * Když reagujeme na událost se zapnutým CAPS LOCK (SHIFT LOCKED) viz IF o jedno výše, stav SHIFTu neměníme, proto není třeba nic dělat.
-		     */
+			/*
+			 * Next two lines of code have to clear Shift for the purose of other processes which take part in input handling.
+			 * When Shift is on, we properly handle it but if do not explicitly send a KeyEvent to the InputConnection, Shift stays turned on
+			 * (There is probably some other process with its own MetaKeyListener). Then the next inserted letter (which we do not handle) handles the Shift
+			 * and becomes capital letter. This behaviour is undesirable of course. That is why we use this workaround. We send two events indicating 
+			 * Shift key press. The first causes CAPS LOCK (SHIFT LOCKED) and the second an entire Shift clearing.
+			 * 
+			 * If we respond to an event and CAPS LOCK (SHIFT LOCKED) is on (see if statement above), we do not change the Shift state, so 
+			 * nothing has to be done. 
+			 */
 			keyDownUp(KeyEvent.KEYCODE_SHIFT_LEFT);
 			keyDownUp(KeyEvent.KEYCODE_SHIFT_LEFT);
 		} else if (shiftLocked) {
@@ -211,7 +212,7 @@ public class ChaChaCzech extends InputMethodService  {
 		}
 		
 		/*
-		 * POdobně jako výše clearujeme SHIFT, tak tady řešíme ALT.
+		 * See the long comment for Shift clearing above, this is the same for ALT.
 		 */
 		if(altActive)
 		{
@@ -226,8 +227,8 @@ public class ChaChaCzech extends InputMethodService  {
     	
     	long old = metaState;
         metaState = MyMetaKeyKeyListener.handleKeyUp(metaState, keyCode, event);
-		Log.v("TEST", "Zdvih: " + Integer.toString(MyMetaKeyKeyListener.getMetaState(old)) + " na : " + Integer.toString(MyMetaKeyKeyListener.getMetaState(metaState)));
-		//Log.v("TYPUDALOSTI", "odchozi kod: " + keyCode);
+		Log.v("TEST", "Key up: " + Integer.toString(MyMetaKeyKeyListener.getMetaState(old)) + " on : " + Integer.toString(MyMetaKeyKeyListener.getMetaState(metaState)));
+		//Log.v("EVENTTYPE", "out key code: " + keyCode);
         return super.onKeyUp(keyCode, event);
     }
 	

@@ -5,7 +5,8 @@ import android.view.View;
 import android.text.*;
 
 /**
- * Originální třída z knihovny Androidu obsahuje bug na dvou různých řádcích, toto je opravená verze. 
+ * The original class from Android library contains bugs on two separate lines, this is a fixed version.
+ * More on this issue:
  * http://android.git.kernel.org/?p=platform/frameworks/base.git;a=history;f=core/java/android/text/method/MetaKeyKeyListener.java;h=61ec67fce237cf62fc5863941b0e5c21d8f718bf;hb=HEAD
  */
 

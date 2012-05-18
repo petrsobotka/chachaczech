@@ -28,7 +28,7 @@ public class ChaChaCzechSettings extends ListActivity {
         SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
         editor = preferences.edit();
         
-        // ziskame pole nastaveni
+        // get the array with settings
         String[] labels = getResources().getStringArray(R.array.settings_items);
         ArrayList<Setting> settings = new ArrayList<Setting>();
         for(int i = 0; i < labels.length; i++ )
@@ -46,14 +46,14 @@ public class ChaChaCzechSettings extends ListActivity {
         }
         
         
-        // namapujeme hodnoty na jednotlive elementy view
+        // map values to view elements
         String[] from = new String[] {"checkbox"};
         int[] to = new int[] { R.id.item_checkbox };
         
-        // vytvorime nosic dat
+        // lets create data carrier
         List<HashMap<String, Setting>> data = new ArrayList<HashMap<String, Setting>>();
         
-        // naplnim data
+        // fill data
         for(Setting s: settings)
         {
         	HashMap<String, Setting> map = new HashMap<String, Setting>();
